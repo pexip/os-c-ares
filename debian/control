@@ -1,13 +1,15 @@
 Source: c-ares
 Priority: extra
-Maintainer: Andreas Schuldei <andreas@debian.org>
-Uploaders: Gregor Jasny <gjasny@googlemail.com>
+Maintainer: Pexip AS <packaging@pexip.com>
+XSBC-Pexip-Original-Maintainer: Andreas Schuldei <andreas@debian.org>
+XSBC-Pexip-Original-Uploaders: Gregor Jasny <gjasny@googlemail.com>
 Build-Depends: debhelper (>= 9), autotools-dev, dh-autoreconf
 Standards-Version: 3.9.4
 Section: libs
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/c-ares.git
 Vcs-Git: git://anonscm.debian.org/collab-maint/c-ares.git
 Homepage: http://c-ares.haxx.se/
+XS-Pexip-Upstream: http://ftp.debian.org/debian/ jessie
 
 
 Package: libc-ares-dev
