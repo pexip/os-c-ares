@@ -11,6 +11,7 @@ libcares.so.2 libc-ares2 #MINVER#
  ares_free_hostent@Base 1.7.0
  ares_free_string@Base 1.7.0
  ares_get_servers@Base 1.7.1
+ ares_get_servers_ports@Base 1.11.0~rc1
  ares_gethostbyaddr@Base 1.7.0
  ares_gethostbyname@Base 1.7.0
  ares_gethostbyname_file@Base 1.7.0
@@ -22,6 +23,8 @@ libcares.so.2 libc-ares2 #MINVER#
  ares_init_options@Base 1.7.0
  ares_library_cleanup@Base 1.7.0
  ares_library_init@Base 1.7.0
+ ares_library_init_mem@Base 1.11.0~rc1
+ ares_library_initialized@Base 1.11.0~rc1
  ares_mkquery@Base 1.7.0
  ares_parse_a_reply@Base 1.7.0
  ares_parse_aaaa_reply@Base 1.7.0
@@ -32,6 +35,7 @@ libcares.so.2 libc-ares2 #MINVER#
  ares_parse_soa_reply@Base 1.9.1
  ares_parse_srv_reply@Base 1.7.0
  ares_parse_txt_reply@Base 1.7.0
+ ares_parse_txt_reply_ext@Base 1.11.0~rc1
  ares_process@Base 1.7.0
  ares_process_fd@Base 1.7.0
  ares_query@Base 1.7.0
@@ -43,7 +47,12 @@ libcares.so.2 libc-ares2 #MINVER#
  ares_set_local_ip6@Base 1.7.4
  ares_set_servers@Base 1.7.1
  ares_set_servers_csv@Base 1.7.4
+ ares_set_servers_ports@Base 1.11.0~rc1
+ ares_set_servers_ports_csv@Base 1.11.0~rc1
  ares_set_socket_callback@Base 1.7.0
+ ares_set_socket_configure_callback@Base 1.11.0~rc1
+ ares_set_socket_functions@Base 1.13.0
+ ares_set_sortlist@Base 1.11.0~rc1
  ares_strerror@Base 1.7.0
  ares_timeout@Base 1.7.0
  ares_version@Base 1.7.0

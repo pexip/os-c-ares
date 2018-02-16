@@ -38,8 +38,9 @@ lib_LTLIBRARIES = libcares.la
 
 man_MANS = $(MANPAGES)
 
-MSVCFILES = vc/vc6aws.dsw vc/acountry/vc6acountry.dsp vc/adig/vc6adig.dsp \
- vc/ahost/vc6ahost.dsp vc/cares/vc6cares.dsp vc/cares/vc6cares.dsw
+MSVCFILES = vc/vc6aws.dsw vc/acountry/vc6acountry.dsp vc/adig/vc6adig.dsp	\
+ vc/ahost/vc6ahost.dsp vc/cares/vc6cares.dsp vc/cares/vc6cares.dsw		\
+ msvc_ver.inc
 
 if CURLDEBUG
 PROGS =
@@ -54,17 +55,21 @@ noinst_PROGRAMS =$(PROGS)
 EXTRA_DIST = AUTHORS CHANGES README.cares Makefile.inc Makefile.dj	   \
  Makefile.m32 Makefile.netware Makefile.msvc Makefile.Watcom $(man_MANS)   \
  config-win32.h RELEASE-NOTES libcares.pc.in buildconf get_ver.awk maketgz \
- TODO ares_build.h.in $(PDFPAGES) cares.rc README.msvc $(MSVCFILES)	   \
- $(CSOURCES) $(HHEADERS) config-dos.h acountry.1 adig.1 ahost.1 INSTALL
+ TODO ares_build.h.in cares.rc README.msvc $(MSVCFILES)	   \
+ $(CSOURCES) $(HHEADERS) config-dos.h acountry.1 adig.1 ahost.1 INSTALL.md	   \
+ CMakeLists.txt ares_build.h.cmake ares_config.h.cmake c-ares-config.cmake.in \
+ libcares.pc.cmake README.md LICENSE.md RELEASE-PROCEDURE.md
 
 CLEANFILES = $(PDFPAGES) $(HTMLPAGES)
 
 DISTCLEANFILES = ares_build.h
 
+DIST_SUBDIRS = test
+
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libcares.pc
 
-CARES_VERSION_INFO = -version-info 3:0:1
+CARES_VERSION_INFO = -version-info 4:0:2
 # This flag accepts an argument of the form current[:revision[:age]]. So,
 # passing -version-info 3:12:1 sets current to 3, revision to 12, and age to
 # 1.
@@ -126,6 +131,10 @@ if DOING_CARES_SYMBOL_HIDING
 libcares_la_CFLAGS_EXTRA += $(CFLAG_CARES_SYMBOL_HIDING)
 libcares_la_CPPFLAGS_EXTRA += -DCARES_SYMBOL_HIDING
 endif
+
+@CODE_COVERAGE_RULES@
+libcares_la_LDFLAGS += $(CODE_COVERAGE_LDFLAGS)
+libcares_la_CFLAGS_EXTRA += $(CODE_COVERAGE_CFLAGS)
 
 libcares_la_CFLAGS = $(AM_CFLAGS) $(libcares_la_CFLAGS_EXTRA)
 
