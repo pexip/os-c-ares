@@ -9,7 +9,7 @@ Section: libs
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/c-ares.git
 Vcs-Git: git://anonscm.debian.org/collab-maint/c-ares.git
 Homepage: http://c-ares.haxx.se/
-XS-Pexip-Upstream: http://ftp.debian.org/debian/ jessie
+XS-Pexip-Upstream: http://ftp.debian.org/debian/ buster
 
 
 Package: libc-ares-dev
