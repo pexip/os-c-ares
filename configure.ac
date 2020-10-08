@@ -1,7 +1,6 @@
 AC_PREREQ(2.57)
 
-dnl Version not hardcoded here. Fetched later from ares_version.h
-AC_INIT([c-ares], [1.10.0],
+AC_INIT([c-ares], [1.14.0],
   [c-ares mailing list: http://cool.haxx.se/mailman/listinfo/c-ares])
 
 XC_OVR_ZZ50
@@ -12,6 +11,7 @@ AC_CONFIG_SRCDIR([ares_ipv6.h])
 AC_CONFIG_HEADERS([ares_config.h ares_build.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_MAINTAINER_MODE
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 CARES_CHECK_OPTION_DEBUG
 CARES_CHECK_OPTION_OPTIMIZE
@@ -19,6 +19,7 @@ CARES_CHECK_OPTION_WARNINGS
 CARES_CHECK_OPTION_WERROR
 CARES_CHECK_OPTION_CURLDEBUG
 CARES_CHECK_OPTION_SYMBOL_HIDING
+CARES_CHECK_OPTION_EXPOSE_STATICS
 
 XC_CHECK_PATH_SEPARATOR
 
@@ -57,12 +58,17 @@ AC_SUBST([EGREP])
 
 dnl AR is mandatory for configure process and libtool.
 dnl This is target dependent, so check it as a tool.
-AC_PATH_TOOL([AR], [ar], [not_found],
-  [$PATH:/usr/bin:/usr/local/bin])
-if test -z "$AR" || test "$AR" = "not_found"; then
-  AC_MSG_ERROR([ar not found in PATH. Cannot continue without ar.])
+if test -z "$AR"; then
+  dnl allow it to be overridden
+  AC_PATH_TOOL([AR], [ar], [not_found],
+    [$PATH:/usr/bin:/usr/local/bin])
+  if test -z "$AR" || test "$AR" = "not_found"; then
+    AC_MSG_ERROR([ar not found in PATH. Cannot continue without ar.])
+  fi
 fi
 AC_SUBST([AR])
+
+AX_CODE_COVERAGE
 
 dnl Remove non-configure distributed ares_build.h
 if test -f ${srcdir}/ares_build.h; then
@@ -78,8 +84,9 @@ dnl Get system canonical name
 AC_DEFINE_UNQUOTED(OS, "${host}", [cpu-machine-OS])
 
 XC_CHECK_PROG_CC
+AX_CXX_COMPILE_STDCXX_11([noext],[optional])
 
-AM_INIT_AUTOMAKE
+XC_AUTOMAKE
 
 dnl This defines _ALL_SOURCE for AIX
 CARES_CHECK_AIX_ALL_SOURCE
@@ -189,6 +196,7 @@ case X-"$ac_cv_native_windows" in
     CURL_CHECK_HEADER_WINSOCK
     CURL_CHECK_HEADER_WINSOCK2
     CURL_CHECK_HEADER_WS2TCPIP
+    CPPFLAGS="$CPPFLAGS -D_WIN32_WINNT=0x0600"
     ;;
   *)
     ac_cv_header_winsock_h="no"
@@ -346,6 +354,30 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
   AC_MSG_ERROR([couldn't find libraries for gethostbyname()])
 fi
 
+dnl resolv lib for iPhone
+AS_IF([test "x$host_vendor" = "xapple"], [
+  AC_MSG_CHECKING([for iPhone target])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+#include "TargetConditionals.h"
+    ]], [[
+#if TARGET_OS_IPHONE == 0
+#error Not an iPhone target
+#endif
+return 0;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    AC_SEARCH_LIBS([res_servicename], [resolv], [
+      AC_DEFINE([CARES_USE_LIBRESOLV], [1], [Use resolver library to configure cares])
+    ], [
+      AC_MSG_ERROR([Unable to find libresolv which is required for iPhone targets])
+    ])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
+])
+
 dnl resolve lib?
 AC_CHECK_FUNC(strcasecmp, , [ AC_CHECK_LIB(resolve, strcasecmp) ])
 
@@ -359,11 +391,62 @@ ac_cv_func_strcasecmp="no"
 
 CARES_CHECK_LIBS_CONNECT
 
+dnl iOS 10?
+AS_IF([test "x$host_vendor" = "xapple"], [
+  AC_MSG_CHECKING([for iOS minimum version 10 or later])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+#include <stdio.h>
+#include <TargetConditionals.h>
+    ]], [[
+#if TARGET_OS_IPHONE == 0 || __IPHONE_OS_VERSION_MIN_REQUIRED < 100000
+#error Not iOS 10 or later
+#endif
+return 0;
+   ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    ac_cv_ios_10="yes"
+  ],[
+    AC_MSG_RESULT([no])
+  ])
+])
+
+dnl macOS 10.12?
+AS_IF([test "x$host_vendor" = "xapple"], [
+  AC_MSG_CHECKING([for macOS minimum version 10.12 or later])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+#include <stdio.h>
+#include <TargetConditionals.h>
+    ]], [[
+#ifndef MAC_OS_X_VERSION_10_12
+#  define MAC_OS_X_VERSION_10_12 101200
+#endif
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_12
+#error Not macOS 10.12 or later
+#endif
+return 0;
+   ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    ac_cv_macos_10_12="yes"
+  ],[
+    AC_MSG_RESULT([no])
+  ])
+])
+
 dnl **********************************************************************
 dnl In case that function clock_gettime with monotonic timer is available,
 dnl check for additional required libraries.
 dnl **********************************************************************
-CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC
+dnl Xcode 8 bug: iOS when targeting less than 10, or macOS when targeting less than 10.12 will
+dnl say clock_gettime exists, it is a weak symbol that only exists in iOS 10 or macOS 10.12 and will
+dnl cause a crash at runtime when running on older versions.  Skip finding CLOCK_MONOTONIC on older
+dnl Apple OS's.
+if test "x$host_vendor" != "xapple" || test "x$ac_cv_ios_10" = "xyes" || test "x$ac_cv_macos_10_12" = "xyes"; then
+  CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC
+fi
 
 AC_MSG_CHECKING([whether to use libgcc])
 AC_ARG_ENABLE(libgcc,
@@ -453,13 +536,6 @@ AC_TYPE_SIZE_T
 AC_HEADER_TIME
 CURL_CHECK_STRUCT_TIMEVAL
 
-AC_CHECK_SIZEOF(size_t)
-AC_CHECK_SIZEOF(long)
-AC_CHECK_SIZEOF(int)
-AC_CHECK_SIZEOF(short)
-CARES_CONFIGURE_LONG
-AC_CHECK_SIZEOF(time_t)
-
 AC_CHECK_TYPE(long long,
    [AC_DEFINE(HAVE_LONGLONG, 1,
      [Define to 1 if the compiler supports the 'long long' data type.])]
@@ -483,8 +559,12 @@ fi
 
 
 # check for ssize_t
-AC_CHECK_TYPE(ssize_t, ,
-   AC_DEFINE(ssize_t, int, [the signed version of size_t]))
+AC_CHECK_TYPE(ssize_t, [ CARES_TYPEOF_ARES_SSIZE_T=ssize_t ],
+  [ CARES_TYPEOF_ARES_SSIZE_T=int ])
+
+AC_DEFINE_UNQUOTED([CARES_TYPEOF_ARES_SSIZE_T], ${CARES_TYPEOF_ARES_SSIZE_T},
+  [the signed version of size_t])
+
 
 # check for bool type
 AC_CHECK_TYPE([bool],[
@@ -731,63 +811,11 @@ AC_CHECK_FUNCS([bitncmp \
   ])
 ])
 
-
-AC_CHECK_SIZEOF(struct in6_addr, ,
-[
-#undef inline
-#ifdef HAVE_WINDOWS_H
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
-#ifdef HAVE_WS2TCPIP_H
-#include <ws2tcpip.h>
-#endif
-#endif
-#else
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#endif
-]
-)
-
-AC_CHECK_SIZEOF(struct in_addr, ,
-[
-#undef inline
-#ifdef HAVE_WINDOWS_H
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
-#ifdef HAVE_WS2TCPIP_H
-#include <ws2tcpip.h>
-#endif
-#endif
-#else
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#endif
-]
-)
-
+dnl Android. Some variants like arm64 may no longer have __system_property_get
+dnl in libc, but they are defined in the headers.  Perform a link check.
+AC_CHECK_FUNC([__system_property_get], [
+    AC_DEFINE([HAVE___SYSTEM_PROPERTY_GET], [1], [Define if __system_property_get exists.])
+])
 
 dnl Check if the getnameinfo function is available
 dnl and get the types of five of its arguments.
@@ -850,5 +878,32 @@ squeeze CARES_PRIVATE_LIBS
 
 XC_CHECK_BUILD_FLAGS
 
+AC_MSG_CHECKING([whether to build tests])
+AC_ARG_ENABLE(tests,
+	AC_HELP_STRING([--enable-tests], [build test suite]),
+	[ build_tests="$enableval" ],
+	[ if test "x$HAVE_CXX11" = "x1" && test "x$cross_compiling" = "xno" ; then
+	    build_tests="yes"
+	  else
+	    build_tests="no"
+	  fi
+	]
+)
+
+if test "x$build_tests" = "xyes" ; then
+	if test "x$HAVE_CXX11" = "0" ; then
+		AC_MSG_ERROR([*** Building tests requires a CXX11 compiler])
+	fi
+	if test "x$cross_compiling" = "xyes" ; then
+		AC_MSG_ERROR([*** Tests not supported when cross compiling])
+	fi
+fi
+AC_MSG_RESULT([$build_tests])
+
+if test "x$build_tests" = "xyes" ; then
+  AC_CONFIG_SUBDIRS([test])
+fi
+
 AC_CONFIG_FILES([Makefile libcares.pc])
 AC_OUTPUT
+XC_AMEND_DISTCLEAN(['.'])

@@ -19,11 +19,14 @@
 ares_library_init \- c-ares library initialization
 .SH SYNOPSIS
 .nf
-.B #include <ares.h>
-.PP
-.B int ares_library_init(int \fIflags\fP)
-.PP
-.B cc file.c -lcares
+#include <ares.h>
+
+int ares_library_init(int \fIflags\fP)
+
+int ares_library_init_mem(int \fIflags\fP,
+                          void *(*\fIamalloc\fP)(size_t),
+                          void (*\fIafree\fP)(void *ptr),
+                          void (*\fIarealloc\fP)(void *ptr, size_t size))
 .fi
 .SH DESCRIPTION
 .PP
@@ -51,6 +54,12 @@ ORing the values together. In normal operation you should specify
 \fIARES_LIB_INIT_ALL\fP. Don't use any other value unless you are
 familiar with it and trying to control some internal c-ares feature.
 .PP
+The
+.B ares_library_init_mem
+function allows the caller to provide memory management functions that the
+c-ares library will be use instead of \fImalloc(3)\fP, \fIfree(3)\fP and
+\fIrealloc(3)\fP.
+.PP
 .B This function is not thread safe.
 You have to call it once the program has started, but this call must be done
 before the program starts any other thread. This is required to avoid
@@ -58,6 +67,9 @@ potential race conditions in library initialization, and also due to the fact
 that \fIares_library_init(3)\fP might call functions from other libraries that
 are thread unsafe, and could conflict with any other thread that is already
 using these other libraries.
+.PP
+On Windows platforms, the library user should ensure that \fIWSAStartup()\fP
+is called before the c-ares library is initialized and used.
 .PP
 Win32/64 application DLLs shall not call \fIares_library_init(3)\fP from the
 DllMain function. Doing so will produce deadlocks and other problems.
