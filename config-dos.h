@@ -32,9 +32,6 @@
 #define NEED_MALLOC_H          1
 
 #define RETSIGTYPE             void
-#define SIZEOF_INT             4
-#define SIZEOF_SHORT           2
-#define SIZEOF_SIZE_T          4
 #define TIME_WITH_SYS_TIME     1
 
 /* Qualifiers for send(), recv(), recvfrom() and getnameinfo(). */
@@ -62,11 +59,6 @@
 #define RECVFROM_TYPE_ARG2_IS_VOID 1
 
 #define BSD
-
-#if defined(__HIGHC__) || \
-    (defined(__GNUC__) && (__GNUC__ < 4))
-  #define ssize_t  int
-#endif
 
 /* Target HAVE_x section */
 
