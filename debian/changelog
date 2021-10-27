@@ -1,3 +1,70 @@
+c-ares (1.18.1-1) unstable; urgency=medium
+
+  * Imported Upstream version 1.18.1
+
+ -- Gregor Jasny <gjasny@googlemail.com>  Wed, 27 Oct 2021 09:15:14 +0200
+
+c-ares (1.18.0-1) unstable; urgency=low
+
+  * Imported Upstream version 1.18.0
+  * Bumped debhelper from old 12 to 13.
+  * Bumped standards to version 4.6.0 (no changes needed)
+  * Updated upstream contact data
+
+ -- Gregor Jasny <gjasny@googlemail.com>  Tue, 26 Oct 2021 15:53:53 +0200
+
+c-ares (1.17.2-1) unstable; urgency=low
+
+  * Imported Upstream version 1.17.2 (fixes CVE-2021-3672)
+  * Bumped standards to version 4.5.2 (no changes needed)
+
+ -- Gregor Jasny <gjasny@googlemail.com>  Wed, 18 Aug 2021 18:21:53 +0200
+
+c-ares (1.17.1-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Missing input validation on hostnames returned by DNS servers
+    (CVE-2021-3672) (Closes: #992053)
+    - ares_expand_name() should escape more characters
+    - ares_expand_name(): fix formatting and handling of root name response
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Sat, 07 Aug 2021 11:43:50 +0200
+
+c-ares (1.17.1-1) unstable; urgency=medium
+
+  * Imported Upstream version 1.17.1 (fixes CVE-2020-8277)
+  * Bumped standards to version 4.5.1 (no changes needed)
+  * Update upstream repository metadata
+  * Ignore installed libtool file for all architectures
+
+ -- Gregor Jasny <gjasny@googlemail.com>  Thu, 19 Nov 2020 18:57:27 +0100
+
+c-ares (1.16.1-1) unstable; urgency=high
+
+  * Imported Upstream version 1.16.1
+  * This release prevents a possible use-after-free and
+    double-free in ares_getaddrinfo() if ares_destroy()
+    is called prior to ares_getaddrinfo() completing.
+
+ -- Gregor Jasny <gjasny@googlemail.com>  Mon, 11 May 2020 20:24:56 +0200
+
+c-ares (1.16.0-1) unstable; urgency=medium
+
+  * Imported Upstream version 1.16.0
+  * Bumped standards to version 4.5.0 (no changes needed)
+  * Use debhelper v12
+
+ -- Gregor Jasny <gjasny@googlemail.com>  Sat, 04 Apr 2020 13:24:31 +0200
+
+c-ares (1.15.0-1) unstable; urgency=low
+
+  * Imported Upstream version 1.15.0
+  * Bumped standards to version 4.4.0 (no changes needed)
+  * Add Build-Depends-Package field in symbols file
+  * Minimize upstream signing key
+
+ -- Gregor Jasny <gjasny@googlemail.com>  Wed, 17 Jul 2019 20:54:21 +0200
+
 c-ares (1.14.0-1) unstable; urgency=low
 
   * Imported Upstream version 1.14.0
@@ -361,4 +428,3 @@ c-ares (1.4.0-1) unstable; urgency=low
   * Initial release (Closes: #359794) packaging c-ares
 
  -- Andreas Schuldei <andreas@debian.org>  Sat, 21 Jul 2007 17:44:06 +0200
-
