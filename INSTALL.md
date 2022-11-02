@@ -39,7 +39,6 @@ unpacked the source archive):
 
     ./configure
     make
-    make ahost adig acountry (optional)
     make install
 
 You probably need to be root when doing the last command.
@@ -334,11 +333,6 @@ provided that you installed Visual C/C++ 6 in the default directory.
 Further details in [README.msvc](README.msvc)
 
 
-### MSVC IDEs
-
-Details in [README.msvc](README.msvc)
-
-
 ### Important static c-ares usage note
 
 When building an application that uses the static c-ares library, you must
@@ -409,7 +403,7 @@ runs on, that isn't listed, please let us know!
 Useful URLs
 ===========
 
- - c-ares: https://c-ares.haxx.se/
+ - c-ares: https://c-ares.org/
  - MingW: http://www.mingw.org/
  - MinGW-w64: http://mingw-w64.sourceforge.net/
  - OpenWatcom: http://www.openwatcom.org/

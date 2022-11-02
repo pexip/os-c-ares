@@ -1,4 +1,5 @@
 libcares.so.2 libc-ares2 #MINVER#
+* Build-Depends-Package: libc-ares-dev
  ares_cancel@Base 1.7.0
  ares_create_query@Base 1.10.0
  ares_destroy@Base 1.7.0
@@ -10,8 +11,10 @@ libcares.so.2 libc-ares2 #MINVER#
  ares_free_data@Base 1.7.0
  ares_free_hostent@Base 1.7.0
  ares_free_string@Base 1.7.0
+ ares_freeaddrinfo@Base 1.16.0
  ares_get_servers@Base 1.7.1
  ares_get_servers_ports@Base 1.11.0~rc1
+ ares_getaddrinfo@Base 1.16.0
  ares_gethostbyaddr@Base 1.7.0
  ares_gethostbyname@Base 1.7.0
  ares_gethostbyname_file@Base 1.7.0
@@ -28,6 +31,7 @@ libcares.so.2 libc-ares2 #MINVER#
  ares_mkquery@Base 1.7.0
  ares_parse_a_reply@Base 1.7.0
  ares_parse_aaaa_reply@Base 1.7.0
+ ares_parse_caa_reply@Base 1.17.0
  ares_parse_mx_reply@Base 1.7.3
  ares_parse_naptr_reply@Base 1.8.0
  ares_parse_ns_reply@Base 1.7.0
@@ -36,6 +40,7 @@ libcares.so.2 libc-ares2 #MINVER#
  ares_parse_srv_reply@Base 1.7.0
  ares_parse_txt_reply@Base 1.7.0
  ares_parse_txt_reply_ext@Base 1.11.0~rc1
+ ares_parse_uri_reply@Base 1.18.0
  ares_process@Base 1.7.0
  ares_process_fd@Base 1.7.0
  ares_query@Base 1.7.0
