@@ -1,3 +1,10 @@
+c-ares (1.18.1-2) unstable; urgency=medium
+
+  * Add str len check in config_sortlist to avoid stack overflow
+    (CVE-2022-4904) (Closes: #1031525)
+
+ -- Gregor Jasny <gjasny@googlemail.com>  Fri, 17 Feb 2023 23:34:35 +0100
+
 c-ares (1.18.1-1pexip1) pexip; urgency=low
 
   * New upstream release

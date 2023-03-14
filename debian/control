@@ -3,7 +3,7 @@ Priority: optional
 Maintainer: Pexip AS <packaging@pexip.com>
 XSBC-Pexip-Original-Maintainer: Gregor Jasny <gjasny@googlemail.com>
 Build-Depends: debhelper-compat (= 13)
-Standards-Version: 4.6.0
+Standards-Version: 4.6.2
 Section: libs
 Vcs-Browser: https://salsa.debian.org/debian/c-ares
 Vcs-Git: https://salsa.debian.org/debian/c-ares.git
