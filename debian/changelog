@@ -1,3 +1,10 @@
+c-ares (1.18.1-3) unstable; urgency=medium
+
+  * Fix buffer underwrite in ares_inet_net_pton (CVE-2023-31130)
+  * Zero byte UDP packet causes DoS (CVE-2023-32067)
+
+ -- Gregor Jasny <gjasny@googlemail.com>  Tue, 23 May 2023 07:58:02 +0200
+
 c-ares (1.18.1-2) unstable; urgency=medium
 
   * Add str len check in config_sortlist to avoid stack overflow
