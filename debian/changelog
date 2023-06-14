@@ -1,3 +1,9 @@
+c-ares (1.18.1-2pexip2) pexip; urgency=medium
+
+  * No-change rebuild
+
+ -- Huw Jones <huw@pexip.com>  Wed, 14 Jun 2023 14:24:39 +0100
+
 c-ares (1.18.1-2pexip1) pexip; urgency=medium
 
   * New upstream release
