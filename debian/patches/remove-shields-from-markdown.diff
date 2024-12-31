@@ -1,0 +1,25 @@
+From: Gregor Jasny <gjasny@googlemail.com>
+Date: Thu, 18 Jul 2024 22:04:29 +0200
+Subject: Remove shileds from markdown file to preserve user privacy
+
+Forwarded: not-needed
+---
+ README.md | 10 +---------
+ 1 file changed, 1 insertion(+), 9 deletions(-)
+
+--- a/README.md
++++ b/README.md
+@@ -1,12 +1,4 @@
+-# [![c-ares logo](https://c-ares.org/art/c-ares-logo.svg)](https://c-ares.org/)
+-
+-[![Build Status](https://api.cirrus-ci.com/github/c-ares/c-ares.svg?branch=main)](https://cirrus-ci.com/github/c-ares/c-ares)
+-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/aevgc5914tm72pvs/branch/main?svg=true)](https://ci.appveyor.com/project/c-ares/c-ares/branch/main)
+-[![Coverage Status](https://coveralls.io/repos/github/c-ares/c-ares/badge.svg?branch=main)](https://coveralls.io/github/c-ares/c-ares?branch=main)
+-[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/291/badge)](https://bestpractices.coreinfrastructure.org/projects/291)
+-[![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/c-ares.svg)](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:c-ares)
+-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=c-ares_c-ares&metric=bugs)](https://sonarcloud.io/summary/new_code?id=c-ares_c-ares)
+-[![Coverity Scan Status](https://scan.coverity.com/projects/c-ares/badge.svg)](https://scan.coverity.com/projects/c-ares)
++# c-ares
+ 
+ - [Overview](#overview)
+ - [Code](#code)

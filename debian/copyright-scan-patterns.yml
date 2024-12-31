@@ -1,0 +1,12 @@
+---
+ignore:
+  pattern:
+  - AUTHORS
+  - README.msvc
+  - aminclude_static.am
+  - /debian/
+  - src/lib/ares_config.h.in
+  - test/fuzzinput
+  - test/fuzznames
+  suffixes:
+  - md

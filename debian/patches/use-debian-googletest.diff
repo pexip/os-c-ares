@@ -1,0 +1,20 @@
+From: Gregor Jasny <gjasny@googlemail.com>
+Date: Thu, 18 Jul 2024 22:04:29 +0200
+Subject: Use Debian packaged GoogleTest
+
+Forwarded: not-needed
+---
+ test/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/test/CMakeLists.txt
++++ b/test/CMakeLists.txt
+@@ -7,7 +7,7 @@
+ ENDIF ()
+ 
+ find_package(Threads)
+-find_package(GTest REQUIRED)
++add_subdirectory(/usr/src/googletest googletest EXCLUDE_FROM_ALL)
+ 
+ IF (CMAKE_VERSION VERSION_LESS "3.23.0")
+   Message("GoogleTest found, cmake version too old to verify GMock, look for errors...")

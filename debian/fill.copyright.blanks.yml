@@ -1,0 +1,13 @@
+---
+include/Makefile.in:
+  license: FSFULLR
+src/Makefile.in:
+  license: FSFULLR
+src/tools/Makefile.in:
+  license: FSFULLR
+test/Makefile.in:
+  license: FSFULLR
+m4/libtool.m4:
+  'override-license': FSFULLR
+config/ltmain.sh:
+  'override-license': GPL-2+ with Libtool exception
