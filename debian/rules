@@ -1,9 +1,19 @@
 #!/usr/bin/make -f
 
-export DEB_BUILD_MAINT_OPTIONS = hardening=+bindnow
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all reproducible=+all
+export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
+export GTEST_FILTER = -*Live*:*.FamilyV4ServiceName/*:LibraryTest.GetTCPSock
 
 %:
-	dh $@
+	dh $@ --buildsystem=cmake+ninja
+
+# useless for CMake (see #844504)
+override_dh_autoreconf:
 
 override_dh_auto_configure:
-	dh_auto_configure -- --enable-shared --enable-symbol-hiding --disable-tests
+	dh_auto_configure -- \
+	-DCARES_BUILD_TOOLS=OFF \
+	-DCARES_SHARED=ON \
+	-DCARES_STATIC=ON \
+	-DCARES_SYMBOL_HIDING=ON \
+	-DCARES_BUILD_TESTS=$(if $(filter nocheck,$(DEB_BUILD_OPTIONS)),OFF,ON)

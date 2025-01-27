@@ -1,4 +1,2 @@
-disable-cflags-rewrite.diff
-CVE-2022-4904.diff
-CVE-2023-31130.diff
-CVE-2023-32067.diff
+use-debian-googletest.diff
+remove-shields-from-markdown.diff
