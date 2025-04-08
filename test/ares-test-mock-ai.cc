@@ -713,6 +713,100 @@ TEST_P(MockChannelTestAI, FamilyUnspecified) {
   EXPECT_THAT(result.ai_, IncludesV6Address("2121:0000:0000:0000:0000:0000:0000:0303"));
 }
 
+
+TEST_P(MockChannelTestAI, TriggerResendThenConnFailSERVFAIL) {
+  // Set up the server response. The server always returns SERVFAIL.
+  DNSPacket badrsp4;
+  badrsp4.set_response().set_aa().set_rcode(SERVFAIL)
+    .add_question(new DNSQuestion("www.google.com", T_A));
+  DNSPacket goodrsp4;
+  goodrsp4.set_response().set_aa()
+    .add_question(new DNSQuestion("www.google.com", T_A))
+    .add_answer(new DNSARR("www.google.com", 0x0100, {0x01, 0x02, 0x03, 0x04}));
+
+  DNSPacket goodrsp6;
+  goodrsp6.set_response().set_aa()
+    .add_question(new DNSQuestion("www.google.com", T_AAAA))
+    .add_answer(new DNSAaaaRR("www.google.com", 100,
+                              {0x21, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x03}));
+
+  EXPECT_CALL(server_, OnRequest("www.google.com", T_A))
+    .WillOnce(SetReplyAndFailSend(&server_, &badrsp4))
+    .WillOnce(SetReply(&server_, &goodrsp4));
+
+  EXPECT_CALL(server_, OnRequest("www.google.com", T_AAAA))
+    .WillRepeatedly(SetReply(&server_, &goodrsp6));
+
+  ares_socket_functions sock_funcs;
+  memset(&sock_funcs, 0, sizeof(sock_funcs));
+
+  sock_funcs.asendv = ares_sendv_fail;
+
+  ares_set_socket_functions(channel_, &sock_funcs, NULL);
+
+  AddrInfoResult result;
+  struct ares_addrinfo_hints hints = {0, 0, 0, 0};
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_flags = ARES_AI_NOSORT;
+  ares_getaddrinfo(channel_, "www.google.com.", NULL, &hints,
+                   AddrInfoCallback, &result);
+
+  Process();
+  EXPECT_TRUE(result.done_);
+  EXPECT_TRUE(result.done_);
+  EXPECT_THAT(result.ai_, IncludesNumAddresses(2));
+  EXPECT_THAT(result.ai_, IncludesV4Address("1.2.3.4"));
+  EXPECT_THAT(result.ai_, IncludesV6Address("2121:0000:0000:0000:0000:0000:0000:0303"));
+}
+
+TEST_P(MockUDPChannelTestAI, TriggerResendThenConnFailEDNS) {
+  // Set up the server response to simulate an EDNS failure
+ DNSPacket badrsp4;
+  badrsp4.set_response().set_aa().set_rcode(FORMERR)
+    .add_question(new DNSQuestion("www.google.com", T_A));
+  DNSPacket goodrsp4;
+  goodrsp4.set_response().set_aa()
+    .add_question(new DNSQuestion("www.google.com", T_A))
+    .add_answer(new DNSARR("www.google.com", 0x0100, {0x01, 0x02, 0x03, 0x04}));
+  DNSPacket goodrsp6;
+  goodrsp6.set_response().set_aa()
+    .add_question(new DNSQuestion("www.google.com", T_AAAA))
+    .add_answer(new DNSAaaaRR("www.google.com", 100,
+                              {0x21, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x03}));
+
+  EXPECT_CALL(server_, OnRequest("www.google.com", T_A))
+    .WillOnce(SetReplyAndFailSend(&server_, &badrsp4))
+    .WillOnce(SetReply(&server_, &goodrsp4));
+
+  EXPECT_CALL(server_, OnRequest("www.google.com", T_AAAA))
+    .WillRepeatedly(SetReply(&server_, &goodrsp6));
+
+  ares_socket_functions sock_funcs;
+  memset(&sock_funcs, 0, sizeof(sock_funcs));
+
+  sock_funcs.asendv = ares_sendv_fail;
+
+  ares_set_socket_functions(channel_, &sock_funcs, NULL);
+
+  AddrInfoResult result;
+  struct ares_addrinfo_hints hints = {0, 0, 0, 0};
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_flags = ARES_AI_NOSORT;
+  ares_getaddrinfo(channel_, "www.google.com.", NULL, &hints,
+                   AddrInfoCallback, &result);
+
+  Process();
+  EXPECT_TRUE(result.done_);
+  EXPECT_TRUE(result.done_);
+  EXPECT_THAT(result.ai_, IncludesNumAddresses(2));
+  EXPECT_THAT(result.ai_, IncludesV4Address("1.2.3.4"));
+  EXPECT_THAT(result.ai_, IncludesV6Address("2121:0000:0000:0000:0000:0000:0000:0303"));
+}
+
+
+
 class MockEDNSChannelTestAI : public MockFlagsChannelOptsTestAI {
  public:
   MockEDNSChannelTestAI() : MockFlagsChannelOptsTestAI(ARES_FLAG_EDNS) {}
@@ -978,6 +1072,182 @@ TEST_P(MockChannelTestAI, FamilyV4ServiceName) {
   ss << result.ai_;
   EXPECT_EQ("{addr=[1.1.1.1:80], addr=[2.2.2.2:80]}", ss.str());
 }
+
+#ifdef HAVE_CONTAINER
+
+class ContainedMockChannelAISysConfig
+    : public MockChannelOptsTest,
+      public ::testing::WithParamInterface<std::pair<int, bool>> {
+ public:
+  ContainedMockChannelAISysConfig()
+    : MockChannelOptsTest(1, GetParam().first, GetParam().second, true, nullptr, 0) {}
+};
+
+static NameContentList files_no_ndots = {
+  {"/etc/resolv.conf", "nameserver 1.2.3.4\n" // Will be replaced
+                       "search example.com example.org\n"
+                       "options edns0 trust-ad\n"}, // ndots:1 is default
+  {"/etc/hosts", "3.4.5.6 ahostname.com\n"},
+  {"/etc/nsswitch.conf", "hosts: files dns\n"}};
+
+/* These tests should still work even with /etc/hosts not having any localhost
+ * entries */
+CONTAINED_TEST_P(ContainedMockChannelAISysConfig, NoHostsLocalHostv4,
+                 "myhostname", "mydomainname.org", files_no_ndots) {
+  AddrInfoResult result = {};
+  struct ares_addrinfo_hints hints = {0, 0, 0, 0};
+  hints.ai_family = AF_INET;
+  hints.ai_flags = ARES_AI_NOSORT;
+  ares_getaddrinfo(channel_, "localhost", NULL, &hints, AddrInfoCallback, &result);
+  Process();
+  EXPECT_TRUE(result.done_);
+  EXPECT_EQ(result.status_, ARES_SUCCESS);
+  EXPECT_THAT(result.ai_, IncludesNumAddresses(1));
+  EXPECT_THAT(result.ai_, IncludesV4Address("127.0.0.1"));
+  return HasFailure();
+}
+
+CONTAINED_TEST_P(ContainedMockChannelAISysConfig, NoHostsLocalHostv6,
+                 "myhostname", "mydomainname.org", files_no_ndots) {
+  AddrInfoResult result = {};
+  struct ares_addrinfo_hints hints = {0, 0, 0, 0};
+  hints.ai_family = AF_INET6;
+  hints.ai_flags = ARES_AI_NOSORT;
+  ares_getaddrinfo(channel_, "localhost", NULL, &hints, AddrInfoCallback, &result);
+  Process();
+  EXPECT_TRUE(result.done_);
+  EXPECT_EQ(result.status_, ARES_SUCCESS);
+  EXPECT_THAT(result.ai_, IncludesNumAddresses(1));
+  EXPECT_THAT(result.ai_, IncludesV6Address("0000:0000:0000:0000:0000:0000:0000:0001"));
+  return HasFailure();
+}
+
+CONTAINED_TEST_P(ContainedMockChannelAISysConfig, NoHostsLocalHostUnspec,
+                 "myhostname", "mydomainname.org", files_no_ndots) {
+  AddrInfoResult result = {};
+  struct ares_addrinfo_hints hints = {0, 0, 0, 0};
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_flags = ARES_AI_NOSORT;
+  ares_getaddrinfo(channel_, "localhost", NULL, &hints, AddrInfoCallback, &result);
+  Process();
+  EXPECT_TRUE(result.done_);
+  EXPECT_EQ(result.status_, ARES_SUCCESS);
+  EXPECT_THAT(result.ai_, IncludesNumAddresses(2));
+  EXPECT_THAT(result.ai_, IncludesV4Address("127.0.0.1"));
+  EXPECT_THAT(result.ai_, IncludesV6Address("0000:0000:0000:0000:0000:0000:0000:0001"));
+  return HasFailure();
+}
+
+
+/* Issue #946 says if a v4 localhost entry exists, but not a v6 entry, v6
+ * isn't output correctly. */
+static NameContentList files_localhost_v4localhostonly = {
+  {"/etc/resolv.conf", "nameserver 1.2.3.4\n" // Will be replaced
+                       "search example.com example.org\n"
+                       "options edns0 trust-ad\n"}, // ndots:1 is default
+  {"/etc/hosts", "127.0.0.1 localhost\n"},
+  {"/etc/nsswitch.conf", "hosts: files dns\n"}};
+CONTAINED_TEST_P(ContainedMockChannelAISysConfig, v4OnlyLocalHostv4,
+                 "myhostname", "mydomainname.org", files_localhost_v4localhostonly) {
+  AddrInfoResult result = {};
+  struct ares_addrinfo_hints hints = {0, 0, 0, 0};
+  hints.ai_family = AF_INET;
+  hints.ai_flags = ARES_AI_NOSORT;
+  ares_getaddrinfo(channel_, "localhost", NULL, &hints, AddrInfoCallback, &result);
+  Process();
+  EXPECT_TRUE(result.done_);
+  EXPECT_EQ(result.status_, ARES_SUCCESS);
+  EXPECT_THAT(result.ai_, IncludesNumAddresses(1));
+  EXPECT_THAT(result.ai_, IncludesV4Address("127.0.0.1"));
+  return HasFailure();
+}
+
+CONTAINED_TEST_P(ContainedMockChannelAISysConfig, v4OnlyLocalHostv6,
+                 "myhostname", "mydomainname.org", files_localhost_v4localhostonly) {
+  AddrInfoResult result = {};
+  struct ares_addrinfo_hints hints = {0, 0, 0, 0};
+  hints.ai_family = AF_INET6;
+  hints.ai_flags = ARES_AI_NOSORT;
+  ares_getaddrinfo(channel_, "localhost", NULL, &hints, AddrInfoCallback, &result);
+  Process();
+  EXPECT_TRUE(result.done_);
+  EXPECT_EQ(result.status_, ARES_SUCCESS);
+  EXPECT_THAT(result.ai_, IncludesNumAddresses(1));
+  EXPECT_THAT(result.ai_, IncludesV6Address("0000:0000:0000:0000:0000:0000:0000:0001"));
+  return HasFailure();
+}
+
+CONTAINED_TEST_P(ContainedMockChannelAISysConfig, v4OnlyLocalHostUnspec,
+                 "myhostname", "mydomainname.org", files_localhost_v4localhostonly) {
+  AddrInfoResult result = {};
+  struct ares_addrinfo_hints hints = {0, 0, 0, 0};
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_flags = ARES_AI_NOSORT;
+  ares_getaddrinfo(channel_, "localhost", NULL, &hints, AddrInfoCallback, &result);
+  Process();
+  EXPECT_TRUE(result.done_);
+  EXPECT_EQ(result.status_, ARES_SUCCESS);
+  EXPECT_THAT(result.ai_, IncludesNumAddresses(2));
+  EXPECT_THAT(result.ai_, IncludesV4Address("127.0.0.1"));
+  EXPECT_THAT(result.ai_, IncludesV6Address("0000:0000:0000:0000:0000:0000:0000:0001"));
+  return HasFailure();
+}
+
+
+static NameContentList files_localhost_v6localhostonly = {
+  {"/etc/resolv.conf", "nameserver 1.2.3.4\n" // Will be replaced
+                       "search example.com example.org\n"
+                       "options edns0 trust-ad\n"}, // ndots:1 is default
+  {"/etc/hosts", "::1 localhost\n"},
+  {"/etc/nsswitch.conf", "hosts: files dns\n"}};
+CONTAINED_TEST_P(ContainedMockChannelAISysConfig, v6OnlyLocalHostv4,
+                 "myhostname", "mydomainname.org", files_localhost_v6localhostonly) {
+  AddrInfoResult result = {};
+  struct ares_addrinfo_hints hints = {0, 0, 0, 0};
+  hints.ai_family = AF_INET;
+  hints.ai_flags = ARES_AI_NOSORT;
+  ares_getaddrinfo(channel_, "localhost", NULL, &hints, AddrInfoCallback, &result);
+  Process();
+  EXPECT_TRUE(result.done_);
+  EXPECT_EQ(result.status_, ARES_SUCCESS);
+  EXPECT_THAT(result.ai_, IncludesNumAddresses(1));
+  EXPECT_THAT(result.ai_, IncludesV4Address("127.0.0.1"));
+  return HasFailure();
+}
+
+CONTAINED_TEST_P(ContainedMockChannelAISysConfig, v6OnlyLocalHostv6,
+                 "myhostname", "mydomainname.org", files_localhost_v6localhostonly) {
+  AddrInfoResult result = {};
+  struct ares_addrinfo_hints hints = {0, 0, 0, 0};
+  hints.ai_family = AF_INET6;
+  hints.ai_flags = ARES_AI_NOSORT;
+  ares_getaddrinfo(channel_, "localhost", NULL, &hints, AddrInfoCallback, &result);
+  Process();
+  EXPECT_TRUE(result.done_);
+  EXPECT_EQ(result.status_, ARES_SUCCESS);
+  EXPECT_THAT(result.ai_, IncludesNumAddresses(1));
+  EXPECT_THAT(result.ai_, IncludesV6Address("0000:0000:0000:0000:0000:0000:0000:0001"));
+  return HasFailure();
+}
+
+CONTAINED_TEST_P(ContainedMockChannelAISysConfig, v6OnlyLocalHostUnspec,
+                 "myhostname", "mydomainname.org", files_localhost_v6localhostonly) {
+  AddrInfoResult result = {};
+  struct ares_addrinfo_hints hints = {0, 0, 0, 0};
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_flags = ARES_AI_NOSORT;
+  ares_getaddrinfo(channel_, "localhost", NULL, &hints, AddrInfoCallback, &result);
+  Process();
+  EXPECT_TRUE(result.done_);
+  EXPECT_EQ(result.status_, ARES_SUCCESS);
+  EXPECT_THAT(result.ai_, IncludesNumAddresses(2));
+  EXPECT_THAT(result.ai_, IncludesV4Address("127.0.0.1"));
+  EXPECT_THAT(result.ai_, IncludesV6Address("0000:0000:0000:0000:0000:0000:0000:0001"));
+  return HasFailure();
+}
+
+INSTANTIATE_TEST_SUITE_P(AddressFamiliesAI, ContainedMockChannelAISysConfig, ::testing::ValuesIn(ares::test::families_modes), PrintFamilyMode);
+#endif
 
 INSTANTIATE_TEST_SUITE_P(AddressFamiliesAI, MockChannelTestAI,
                        ::testing::ValuesIn(ares::test::families_modes), PrintFamilyMode);
