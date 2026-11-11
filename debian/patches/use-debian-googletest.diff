@@ -9,7 +9,7 @@ Forwarded: not-needed
 
 --- a/test/CMakeLists.txt
 +++ b/test/CMakeLists.txt
-@@ -7,7 +7,7 @@
+@@ -9,7 +9,7 @@
  ENDIF ()
  
  find_package(Threads)
