@@ -1,5 +1,5 @@
-version=4
-opts="searchmode=plain,\
-pgpsigurlmangle=s%$%.asc%" \
-https://api.github.com/repos/@PACKAGE@/@PACKAGE@/releases?per_page=50 \
-https://github.com/@PACKAGE@/@PACKAGE@/releases/download/v[^/]+/@PACKAGE@@ANY_VERSION@@ARCHIVE_EXT@
+Version: 5
+Source: https://api.github.com/repos/@PACKAGE@/@PACKAGE@/releases
+Matching-Pattern: https://github.com/@PACKAGE@/@PACKAGE@/releases/download/v[^/]+/@PACKAGE@@STABLE_VERSION@@ARCHIVE_EXT@
+Search-Mode: plain
+Pgp-Sig-Url-Mangle: s%$%.asc%

@@ -2,7 +2,7 @@
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all reproducible=+all
 export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
-export GTEST_FILTER = -*Live*:*.FamilyV4ServiceName/*:LibraryTest.GetTCPSock
+export GTEST_FILTER = -*Live*:*.FamilyV4ServiceName/*:LibraryTest.GetTCPSock:SockStateDeliveryTest.*
 
 %:
 	dh $@ --buildsystem=cmake+ninja
@@ -17,3 +17,8 @@ override_dh_auto_configure:
 	-DCARES_STATIC=ON \
 	-DCARES_SYMBOL_HIDING=ON \
 	-DCARES_BUILD_TESTS=$(if $(filter nocheck,$(DEB_BUILD_OPTIONS)),OFF,ON)
+
+execute_before_dh_auto_build:
+	# somehow the test files ignore the CPPFLAGS and CXXFLAGS
+	# until this is solved, ignore those because they aren't shipped
+	@echo 'blhc: ignore-line-regexp: .* -o test/.*'

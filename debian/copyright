@@ -1,4 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: c-ares
+Upstream-Contact: c-ares@lists.haxx.se
 
 Files: *
 Copyright: 2023, 2024, The c-ares project and its contributors.
@@ -265,10 +267,6 @@ Copyright: 2021, 2024, Jörn Heusipp <osmanx@problemloesungsmaschine.de>
  2013, Roy Stogner <roystgnr@ices.utexas.edu>
  2012, Zack Weinberg <zackw@panix.com>
  2008, Benjamin Kosnik <bkoz@redhat.com>
-License: FSFAP
-
-Files: m4/ax_cxx_compile_stdcxx_14.m4
-Copyright: 2015, Moritz Klammler <moritz@klammler.eu>
 License: FSFAP
 
 Files: m4/ax_file_escapes.m4
@@ -605,9 +603,7 @@ License: GPL-2+ with Autoconf-data exception
  General Public License for more details.
  .
  You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- 02110-1301, USA.
+ along with this program; if not, see <https://www.gnu.org/licenses/>.
  .
  As a special exception to the GNU General Public License, if you
  distribute this file as part of a program that contains a

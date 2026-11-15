@@ -1,3 +1,59 @@
+c-ares (1.34.9-1~pexip25u1+deb13u1) pexip-trixie; urgency=medium
+
+  * New upstream release with security fixes
+
+ -- Steve McIntyre <steve.mcintyre@pexip.com>  Sun, 15 Nov 2026 15:50:12 +0000
+
+c-ares (1.34.9-1~deb13u1) trixie-security; urgency=high
+
+  * Non-maintainer upload by the Security Team.
+  * New upstream stable point release.
+  * CVE-2026-33630: Fix query-completion use-after-free and double-free.
+  * CVE-2026-69184: Bound DNS compression pointer traversal.
+  * CVE-2026-69186: Limit record-count memory amplification.
+  * GHSA-wpr3-8q3r-4q8c: Fix cancellation after connection failure.
+  * GHSA-fqh5-3x7m-wp44: Reject replies from the wrong server.
+  * GHSA-97vq-4mxv-7vhm: Fix lookup use-after-free after failed shutdown.
+  * GHSA-rf6g-ww74-97qh: Fix cancellation and channel shutdown use-after-free.
+  * GHSA-mw23-pfg6-2x9r: Fix connection use-after-free in socket callback.
+  * GHSA-v33j-65h4-4ch8: Fix cancellation in server-status callback.
+  * GHSA-pj7p-v3cw-hq66: Fix server-record use-after-free on reconfiguration.
+  * GHSA-grv7-fq5q-9vfc: Fix cached-answer use-after-free.
+  * GHSA-ph6c-3cvx-mq6v: Fix concurrent server update buffer overflow.
+  * GHSA-cfcv-8v2j-qj6r: Fix uninitialized IPv6 address data.
+  * GHSA-wrgc-prmw-27xh: Prevent cache reuse with different EDNS options.
+  * Drop CVE-2025-62408 patch, included upstream.
+
+ -- Aron Xu <aron@debian.org>  Wed, 11 Nov 2026 13:51:11 +0800
+
+c-ares (1.34.9-1) unstable; urgency=high
+
+  * Imported Upstream version 1.34.9 (with lots of security fixes)
+
+ -- Gregor Jasny <gjasny@googlemail.com>  Mon, 26 Oct 2026 22:02:49 +0100
+
+c-ares (1.34.8-1) unstable; urgency=high
+
+  * Imported Upstream version 1.34.8 (fixes regression in 1.34.7)
+
+ -- Gregor Jasny <gjasny@googlemail.com>  Tue, 07 Jul 2026 19:31:45 +0200
+
+c-ares (1.34.7-1) unstable; urgency=high
+
+  [ Gregor Jasny ]
+  * Imported Upstream version 1.34.7 (fixes CVE-2026-33630)
+
+  [ Bastian Germann ]
+  * Prevent googletest installation for nocheck
+
+ -- Gregor Jasny <gjasny@googlemail.com>  Mon, 06 Jul 2026 21:40:21 +0200
+
+c-ares (1.34.6-1) unstable; urgency=high
+
+  * Imported Upstream version 1.34.6 (fixes CVE-2025-62408)
+
+ -- Gregor Jasny <gjasny@googlemail.com>  Mon, 08 Dec 2025 20:48:36 +0100
+
 c-ares (1.34.5-1+pexip25u3+deb13u1) pexip-trixie; urgency=medium
 
   * New upstream release.
